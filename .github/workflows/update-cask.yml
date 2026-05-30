@@ -1,5 +1,10 @@
 name: Update cask
 
+# Cask updates do not require a GitHub Release in this tap. Homebrew reads
+# the cask file from the default branch and downloads the binary directly
+# from the URL inside it (hosted in the upstream repo). Only formula bottles
+# need a release here, which is handled by the brew pr-pull workflow.
+
 on:
   repository_dispatch:
     types: [update-cask]

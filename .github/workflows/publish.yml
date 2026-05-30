@@ -1,5 +1,10 @@
 name: brew pr-pull
 
+# Handles formula updates only. It downloads bottle artifacts built by
+# brew test-bot, uploads them to a GitHub Release, and updates the bottle
+# block in the formula. Cask updates do not go through this workflow because
+# casks have no bottles; the updated .rb file on master is all that is needed.
+
 on:
   pull_request_target:
     types:
