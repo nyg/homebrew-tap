@@ -1,0 +1,104 @@
+name: Update cask
+
+on:
+  repository_dispatch:
+    types: [update-cask]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (e.g. 0.0.10 or v0.0.10)"
+        required: true
+      dmg_sha256:
+        description: "DMG SHA256 (leave empty to download and compute)"
+        required: false
+
+concurrency:
+  group: update-cask
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse inputs
+        id: inputs
+        run: |
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            VERSION="${{ github.event.client_payload.version }}"
+            DMG_SHA256="${{ github.event.client_payload.dmg_sha256 }}"
+          else
+            VERSION="${{ github.event.inputs.version }}"
+            DMG_SHA256="${{ github.event.inputs.dmg_sha256 }}"
+          fi
+
+          VERSION="${VERSION#v}"
+          DMG_URL="https://github.com/nyg/qoqa-compta/releases/download/v${VERSION}/QoQa.Compta.dmg"
+
+          {
+            echo "version=$VERSION"
+            echo "dmg_url=$DMG_URL"
+            echo "dmg_sha256=$DMG_SHA256"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Download DMG and compute SHA256
+        id: sha
+        if: steps.inputs.outputs.dmg_sha256 == ''
+        env:
+          DMG_URL: ${{ steps.inputs.outputs.dmg_url }}
+        run: |
+          for i in 1 2 3 4 5; do
+            if curl -fsSL --retry 3 -o qoqa-compta.dmg "$DMG_URL"; then
+              break
+            fi
+            echo "Attempt $i failed, retrying in 15s…"
+            sleep 15
+          done
+
+          if [ ! -f qoqa-compta.dmg ]; then
+            echo "::error::Failed to download DMG from $DMG_URL"
+            exit 1
+          fi
+
+          SHA256=$(sha256sum qoqa-compta.dmg | awk '{print $1}')
+          echo "sha256=$SHA256" >> "$GITHUB_OUTPUT"
+          rm qoqa-compta.dmg
+
+      - name: Resolve SHA256
+        id: resolved
+        run: |
+          SHA256="${{ steps.inputs.outputs.dmg_sha256 }}"
+          if [ -z "$SHA256" ]; then
+            SHA256="${{ steps.sha.outputs.sha256 }}"
+          fi
+          echo "sha256=$SHA256" >> "$GITHUB_OUTPUT"
+
+      - name: Update cask
+        env:
+          VERSION: ${{ steps.inputs.outputs.version }}
+          SHA256: ${{ steps.resolved.outputs.sha256 }}
+        run: |
+          CASK="Casks/qoqa-compta.rb"
+
+          sed -i "s|version \"[^\"]*\"|version \"${VERSION}\"|" "$CASK"
+          sed -i "s|sha256 \"[a-f0-9]\{64\}\"|sha256 \"${SHA256}\"|" "$CASK"
+
+          # Verify replacements landed correctly
+          grep -q "version \"${VERSION}\"" "$CASK" || { echo "::error::Version replacement failed"; exit 1; }
+          grep -q "sha256 \"${SHA256}\"" "$CASK" || { echo "::error::SHA256 replacement failed"; exit 1; }
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          commit-message: "qoqa-compta ${{ steps.inputs.outputs.version }}"
+          title: "qoqa-compta ${{ steps.inputs.outputs.version }}"
+          body: |
+            Automated cask update for qoqa-compta ${{ steps.inputs.outputs.version }}.
+
+            - **DMG:** `${{ steps.inputs.outputs.dmg_url }}`
+            - **SHA256:** `${{ steps.resolved.outputs.sha256 }}`
+          branch: "update-qoqa-compta-${{ steps.inputs.outputs.version }}"
+          delete-branch: true
+          auto-merge: true

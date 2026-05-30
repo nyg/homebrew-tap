@@ -1,0 +1,59 @@
+name: brew pr-pull
+
+on:
+  pull_request_target:
+    types:
+      - labeled
+
+jobs:
+  pr-pull:
+    if: >-
+      github.event.label.name == 'pr-pull'
+      && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    concurrency: pr-pull-${{ github.event.pull_request.number }}
+    permissions:
+      actions: read
+      checks: read
+      contents: write
+      issues: read
+      pull-requests: write
+    steps:
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@main
+        with:
+          token: ${{ github.token }}
+
+      - name: Set up git
+        uses: Homebrew/actions/git-user-config@main
+
+      - name: Pull bottles
+        env:
+          HOMEBREW_GITHUB_API_TOKEN: ${{ github.token }}
+          PULL_REQUEST: ${{ github.event.pull_request.number }}
+        run: brew pr-pull --debug --tap="$GITHUB_REPOSITORY" "$PULL_REQUEST"
+
+      - name: Merge PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_BRANCH: ${{ github.event.pull_request.head.ref }}
+          PULL_REQUEST: ${{ github.event.pull_request.number }}
+        run: |
+          git push origin HEAD:refs/heads/"$PR_BRANCH" --force
+          HEAD_SHA="$(git rev-parse HEAD)"
+
+          # Wait for GitHub to recalculate mergeability after force-push
+          for i in $(seq 1 12); do
+            STATE="$(gh pr view "$PULL_REQUEST" --json mergeStateStatus --jq .mergeStateStatus)"
+            echo "Attempt $i: mergeStateStatus=$STATE"
+            if [ "$STATE" = "CLEAN" ] || [ "$STATE" = "UNSTABLE" ] || [ "$STATE" = "HAS_HOOKS" ]; then
+              break
+            fi
+            if [ "$i" -eq 12 ]; then
+              echo "::error::PR not mergeable after 60s (state: $STATE)"
+              exit 1
+            fi
+            sleep 5
+          done
+
+          gh pr merge "$PULL_REQUEST" --squash --delete-branch --match-head-commit "$HEAD_SHA"

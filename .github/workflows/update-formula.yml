@@ -1,0 +1,107 @@
+name: Update formula
+
+on:
+  repository_dispatch:
+    types: [update-formula]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (e.g. 1.3.0 or v1.3.0)"
+        required: true
+      jar_url:
+        description: "JAR download URL (leave empty to auto-construct)"
+        required: false
+      java_version:
+        description: "OpenJDK major version (e.g. 25). Leave empty to keep current."
+        required: false
+
+concurrency:
+  group: update-formula
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse inputs
+        id: inputs
+        run: |
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            VERSION="${{ github.event.client_payload.version }}"
+            JAR_URL="${{ github.event.client_payload.jar_url }}"
+            JAVA_VERSION="${{ github.event.client_payload.java_version }}"
+          else
+            VERSION="${{ github.event.inputs.version }}"
+            JAR_URL="${{ github.event.inputs.jar_url }}"
+            JAVA_VERSION="${{ github.event.inputs.java_version }}"
+          fi
+
+          VERSION="${VERSION#v}"
+
+          if [ -z "$JAR_URL" ]; then
+            JAR_URL="https://github.com/nyg/jmxsh/releases/download/v${VERSION}/jmxsh-${VERSION}.jar"
+          fi
+
+          {
+            echo "version=$VERSION"
+            echo "jar_url=$JAR_URL"
+            echo "java_version=$JAVA_VERSION"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Download JAR and compute SHA256
+        id: sha
+        env:
+          JAR_URL: ${{ steps.inputs.outputs.jar_url }}
+        run: |
+          for i in 1 2 3 4 5; do
+            if curl -fsSL --retry 3 -o jmxsh.jar "$JAR_URL"; then
+              break
+            fi
+            echo "Attempt $i failed, retrying in 15s…"
+            sleep 15
+          done
+
+          if [ ! -f jmxsh.jar ]; then
+            echo "::error::Failed to download JAR from $JAR_URL"
+            exit 1
+          fi
+
+          SHA256=$(sha256sum jmxsh.jar | awk '{print $1}')
+          echo "sha256=$SHA256" >> "$GITHUB_OUTPUT"
+          rm jmxsh.jar
+
+      - name: Update formula
+        env:
+          VERSION: ${{ steps.inputs.outputs.version }}
+          JAR_URL: ${{ steps.inputs.outputs.jar_url }}
+          SHA256: ${{ steps.sha.outputs.sha256 }}
+          JAVA_VERSION: ${{ steps.inputs.outputs.java_version }}
+        run: |
+          FORMULA="Formula/jmxsh.rb"
+
+          sed -i "s|url \"https://github.com/nyg/jmxsh/releases/download/.*\"|url \"${JAR_URL}\"|" "$FORMULA"
+          sed -i "s|sha256 \"[a-f0-9]\{64\}\"|sha256 \"${SHA256}\"|" "$FORMULA"
+
+          if [ -n "$JAVA_VERSION" ]; then
+            sed -i "s|depends_on \"openjdk@[0-9]*\"|depends_on \"openjdk@${JAVA_VERSION}\"|" "$FORMULA"
+          fi
+
+          # Verify replacements landed correctly
+          grep -q "url \"${JAR_URL}\"" "$FORMULA" || { echo "::error::URL replacement failed"; exit 1; }
+          grep -q "sha256 \"${SHA256}\"" "$FORMULA" || { echo "::error::SHA256 replacement failed"; exit 1; }
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          commit-message: "jmxsh ${{ steps.inputs.outputs.version }}"
+          title: "jmxsh ${{ steps.inputs.outputs.version }}"
+          body: |
+            Automated formula update for jmxsh ${{ steps.inputs.outputs.version }}.
+
+            - **JAR:** `${{ steps.inputs.outputs.jar_url }}`
+            - **SHA256:** `${{ steps.sha.outputs.sha256 }}`
+          branch: "update-jmxsh-${{ steps.inputs.outputs.version }}"
+          delete-branch: true
