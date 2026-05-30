@@ -12,12 +12,16 @@ brew tap nyg/tap
 
 ### Formulas
 
-| Package | Description | Install | Docs |
-|---------|-------------|---------|------|
-| [jmxsh](https://github.com/nyg/jmxsh) | Command-line JMX client | `brew install nyg/tap/jmxsh` | [docs](docs/jmxsh.md) |
+| Package | Description | Install |
+|---------|-------------|---------|
+| [jmxsh](https://github.com/nyg/jmxsh) | Command-line JMX client | `brew install nyg/tap/jmxsh` |
 
 ### Casks
 
 | Package | Description | Install |
 |---------|-------------|---------|
 | [QoQa Compta](https://github.com/nyg/qoqa-compta) | QoQa order accounting and invoice viewer | `brew install --cask nyg/tap/qoqa-compta` |
+
+## Automated Updates
+
+Formulas and casks in this tap are updated automatically when a new upstream release is published. See [docs/automated-updates.md](docs/automated-updates.md) for details.
