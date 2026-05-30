@@ -50,7 +50,7 @@ sequenceDiagram
 
 ## Cask pipeline (qoqa-compta)
 
-Casks don't require bottles, so the pipeline is simpler — no `brew test-bot` bottle build or `brew pr-pull` publish step.
+Casks don't require bottles, so the pipeline is simpler — no `brew test-bot` bottle build, no `brew pr-pull` publish step, and **no GitHub Release in this tap**. Homebrew installs casks by reading the `.rb` file from the default branch and downloading the binary directly from the URL inside it (hosted in the upstream repo, `nyg/qoqa-compta`). A release in this tap would serve no purpose.
 
 ### Overview
 
@@ -80,4 +80,4 @@ sequenceDiagram
 
 3. **Test** ([`tests.yml`](../.github/workflows/tests.yml)) — Runs `brew test-bot` for tap syntax validation. No bottles are built for casks.
 
-4. **Merge** — Once tests pass, the PR is merged manually.
+4. **Merge** — Once tests pass, the `pr-pull` label is applied manually to the PR, which triggers [`publish.yml`](../.github/workflows/publish.yml). Because there are no bottles to pull, `brew pr-pull` simply merges the PR. No GitHub Release is created.
