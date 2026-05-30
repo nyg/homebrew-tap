@@ -61,6 +61,8 @@ sequenceDiagram
     participant UC as update-cask.yml
     participant PR as Pull Request
     participant TB as tests.yml
+    participant H as Human
+    participant PB as publish.yml
     participant M as master
 
     U->>D: Release published
@@ -69,7 +71,11 @@ sequenceDiagram
     UC->>PR: Create PR (update cask)
     PR->>TB: pull_request event
     TB->>TB: Run brew test-bot (syntax check)
-    TB-->>M: Merge PR manually
+    H->>PR: Apply pr-pull label (manually)
+    PR->>PB: pull_request_target labeled
+    PB->>PB: brew pr-pull (no bottles,<br/>no release created)
+    PB->>M: Squash-merge PR
+    PB->>PR: Delete branch
 ```
 
 ### Step-by-step
