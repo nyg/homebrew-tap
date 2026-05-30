@@ -101,4 +101,3 @@ jobs:
             - **SHA256:** `${{ steps.resolved.outputs.sha256 }}`
           branch: "update-qoqa-compta-${{ steps.inputs.outputs.version }}"
           delete-branch: true
-          auto-merge: true
