@@ -1,8 +1,8 @@
 class Jmxsh < Formula
   desc "Command-line JMX client for monitoring and managing Java applications"
   homepage "https://github.com/nyg/jmxsh"
-  url "https://github.com/nyg/jmxsh/releases/download/v1.3.0/jmxsh-1.3.0.jar"
-  sha256 "ecc488a09a82aa22e7bf6b53d6ae9359db7a1d27987be5d57fc2ae360a399c74"
+  url "https://github.com/nyg/jmxsh/releases/download/v1.3.1/jmxsh-1.3.1.jar"
+  sha256 "6be640480bca7da33c02ef53a43516e7c946cfcefc57e086dfbf07c066e9d8dc"
   license "Apache-2.0"
 
   livecheck do
@@ -11,9 +11,9 @@ class Jmxsh < Formula
   end
 
   bottle do
-    root_url "https://github.com/nyg/homebrew-tap/releases/download/jmxsh-1.3.0"
-    sha256 cellar: :any_skip_relocation, arm64_tahoe:  "ee02a1146e1b4bf553f41b476c5ceee30cb3cc5839244f4c607b25b753427bb1"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "9190fc33e6ceedc3b84926126048abd97cb9d608c1c07e5dd83e356aa81afe53"
+    root_url "https://github.com/nyg/homebrew-tap/releases/download/jmxsh-1.3.1"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:  "9c21e36c60b5e60496a0f5c025c4e23b2d82ba8f820fb283a8647b69be5b2947"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "b688de0854c251b617d3ae9739515d410d8f0b310e13cbba37421e8284b4f039"
   end
 
   depends_on "openjdk@25"
