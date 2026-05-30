@@ -12,9 +12,9 @@ brew tap nyg/tap
 
 ### Formulas
 
-| Package | Description | Install |
-|---------|-------------|---------|
-| [jmxsh](https://github.com/nyg/jmxsh) | Command-line JMX client | `brew install nyg/tap/jmxsh` |
+| Package | Description | Install | Docs |
+|---------|-------------|---------|------|
+| [jmxsh](https://github.com/nyg/jmxsh) | Command-line JMX client | `brew install nyg/tap/jmxsh` | [docs](docs/jmxsh.md) |
 
 ### Casks
 
