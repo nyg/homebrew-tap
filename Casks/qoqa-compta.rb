@@ -12,13 +12,13 @@ cask "qoqa-compta" do
     strategy :github_latest
   end
 
+  depends_on :macos
+
   app "QoQa Compta.app"
 
-  zap trash: [
-    "~/Library/Application Support/qoqa-compta",
-  ]
+  zap trash: "~/Library/Application Support/qoqa-compta"
 
-  caveat <<~EOS
+  caveats <<~EOS
     QoQa Compta is not notarized. On first launch, right-click the app and select Open.
   EOS
 end
