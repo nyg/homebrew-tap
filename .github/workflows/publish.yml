@@ -20,12 +20,12 @@ jobs:
       pull-requests: write
     steps:
       - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@main
+        uses: Homebrew/actions/setup-homebrew@521d40582eb7b2dc6c83001c590c455100248f27 # main
         with:
           token: ${{ github.token }}
 
       - name: Set up git
-        uses: Homebrew/actions/git-user-config@main
+        uses: Homebrew/actions/git-user-config@521d40582eb7b2dc6c83001c590c455100248f27 # main
 
       - name: Pull bottles
         env:
