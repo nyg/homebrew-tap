@@ -20,6 +20,7 @@ brew tap nyg/tap
 
 | Package | Description | Install |
 |---------|-------------|---------|
+| [CryptoTools](https://github.com/nyg/crypto-tools) | Cryptocurrency tools for Kraken and Binance exchanges | `brew install --cask nyg/tap/crypto-tools` |
 | [QoQa Compta](https://github.com/nyg/qoqa-compta) | QoQa order accounting and invoice viewer | `brew install --cask nyg/tap/qoqa-compta` |
 
 ## Automated Updates
