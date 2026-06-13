@@ -33,7 +33,10 @@ jobs:
         uses: Homebrew/actions/git-user-config@521d40582eb7b2dc6c83001c590c455100248f27 # main
 
       - name: Trust tap
-        run: brew trust "$GITHUB_REPOSITORY"
+        run: |
+          OWNER="${GITHUB_REPOSITORY%%/*}"
+          REPO="${GITHUB_REPOSITORY##*/}"
+          brew trust "${OWNER}/${REPO#homebrew-}"
 
       - name: Pull bottles
         env:

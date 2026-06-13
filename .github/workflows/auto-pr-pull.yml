@@ -1,4 +1,12 @@
-name: Auto pr-pull
+name: Auto-publish update PRs
+
+# Once "brew test-bot" passes on an automated update-* PR, decide how to
+# publish it based on what it changes:
+#   - Formula updates -> apply the "pr-pull" label, which triggers the
+#     brew pr-pull workflow to build/upload bottles and merge.
+#   - Cask updates    -> squash-merge directly. Casks have no bottles and need
+#     no GitHub Release, so the updated .rb on master is all Homebrew needs;
+#     routing them through brew pr-pull would only run unnecessary machinery.
 
 on:
   workflow_run:
@@ -9,7 +17,7 @@ concurrency:
   group: auto-pr-pull-${{ github.event.workflow_run.head_branch }}
 
 jobs:
-  auto-label:
+  route:
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'pull_request' &&
@@ -17,36 +25,68 @@ jobs:
       github.event.workflow_run.head_repository.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
-      - name: Apply pr-pull label
+      - name: Route PR by package type
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           github-token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
           script: |
+            // Resolve the PR number for the branch that was tested.
             const prs = context.payload.workflow_run.pull_requests;
-            let prNumber;
+            let prNumber = prs && prs.length > 0 ? prs[0].number : undefined;
 
-            if (prs && prs.length > 0) {
-              prNumber = prs[0].number;
-            } else {
-              // Fallback: find PR by branch name
+            if (!prNumber) {
+              // Fallback: find the open PR by branch name.
               const branch = context.payload.workflow_run.head_branch;
-              const result = await github.rest.pulls.list({
+              const { data } = await github.rest.pulls.list({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 head: `${context.repo.owner}:${branch}`,
                 state: 'open',
               });
-              if (result.data.length === 0) {
+              if (data.length === 0) {
                 core.warning(`No open PR found for branch ${branch}`);
                 return;
               }
-              prNumber = result.data[0].number;
+              prNumber = data[0].number;
             }
 
-            core.info(`Applying pr-pull label to PR #${prNumber}`);
-            await github.rest.issues.addLabels({
+            // Inspect the changed files to tell casks from formulae.
+            const files = await github.paginate(github.rest.pulls.listFiles, {
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: prNumber,
-              labels: ['pr-pull'],
+              pull_number: prNumber,
             });
+            const paths = files.map(f => f.filename);
+            const touchesFormula = paths.some(p => p.startsWith('Formula/'));
+            const touchesCask = paths.some(p => p.startsWith('Casks/'));
+
+            if (touchesFormula) {
+              core.info(`Formula update in PR #${prNumber}; applying pr-pull label`);
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                labels: ['pr-pull'],
+              });
+            } else if (touchesCask) {
+              core.info(`Cask update in PR #${prNumber}; squash-merging directly`);
+              await github.rest.pulls.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                merge_method: 'squash',
+              });
+
+              const branch = context.payload.workflow_run.head_branch;
+              try {
+                await github.rest.git.deleteRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `heads/${branch}`,
+                });
+              } catch (error) {
+                core.warning(`Could not delete branch ${branch}: ${error.message}`);
+              }
+            } else {
+              core.warning(`PR #${prNumber} changes neither Formula/ nor Casks/; skipping`);
+            }
