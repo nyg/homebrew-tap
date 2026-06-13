@@ -32,6 +32,9 @@ jobs:
       - name: Set up git
         uses: Homebrew/actions/git-user-config@521d40582eb7b2dc6c83001c590c455100248f27 # main
 
+      - name: Trust tap
+        run: brew trust "$GITHUB_REPOSITORY"
+
       - name: Pull bottles
         env:
           HOMEBREW_GITHUB_API_TOKEN: ${{ github.token }}
