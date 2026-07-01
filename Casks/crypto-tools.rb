@@ -1,6 +1,6 @@
 cask "crypto-tools" do
-  version "0.0.10"
-  sha256 "291d13433109a9a5890d1d26dc64b5b2601d48918f3b5d6131d2102ca53a7379"
+  version "0.0.11"
+  sha256 "35e4f0af06a238dd1d246559006a0644f46d97ed0a228b61e4465beb275a0719"
 
   url "https://github.com/nyg/crypto-tools/releases/download/v#{version}/CryptoTools.dmg"
   name "CryptoTools"
