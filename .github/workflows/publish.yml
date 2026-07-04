@@ -25,12 +25,12 @@ jobs:
       pull-requests: write
     steps:
       - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@b141687885fe713432eee08f5d5570c8d347fca0 # main
+        uses: Homebrew/actions/setup-homebrew@097625b28a26ba4b7437926ab03b4d3bd2e6c3d1 # main
         with:
           token: ${{ github.token }}
 
       - name: Set up git
-        uses: Homebrew/actions/git-user-config@b141687885fe713432eee08f5d5570c8d347fca0 # main
+        uses: Homebrew/actions/git-user-config@097625b28a26ba4b7437926ab03b4d3bd2e6c3d1 # main
 
       - name: Trust tap
         run: |
