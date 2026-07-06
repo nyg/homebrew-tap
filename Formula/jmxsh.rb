@@ -1,8 +1,8 @@
 class Jmxsh < Formula
   desc "Command-line JMX client for monitoring and managing Java applications"
   homepage "https://github.com/nyg/jmxsh"
-  url "https://github.com/nyg/jmxsh/releases/download/v1.4.0/jmxsh-1.4.0.jar"
-  sha256 "ccd9c7457b7b76d375bbecd305ffe45d76cdaa8cb8d2fce83f4184b0d0ef8ac3"
+  url "https://github.com/nyg/jmxsh/releases/download/v1.5.0/jmxsh-1.5.0.jar"
+  sha256 "8391c9b965544ef6a43b8c0cd025947a9e13d79290753043849bc6cc1992737a"
   license "Apache-2.0"
 
   livecheck do
