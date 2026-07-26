@@ -1,0 +1,102 @@
+name: Update wiktionary-to-kindle cask
+
+on:
+  repository_dispatch:
+    types: [update-wiktionary-to-kindle-cask]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (e.g. 2.0.0 or v2.0.0)"
+        required: true
+      dmg_sha256:
+        description: "DMG SHA256 (leave empty to download and compute)"
+        required: false
+
+concurrency:
+  group: update-wiktionary-to-kindle-cask
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Parse inputs
+        id: inputs
+        run: |
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            VERSION="${{ github.event.client_payload.version }}"
+            DMG_SHA256="${{ github.event.client_payload.dmg_sha256 }}"
+          else
+            VERSION="${{ github.event.inputs.version }}"
+            DMG_SHA256="${{ github.event.inputs.dmg_sha256 }}"
+          fi
+
+          VERSION="${VERSION#v}"
+          DMG_URL="https://github.com/nyg/wiktionary-to-kindle/releases/download/v${VERSION}/WiktionaryToKindle.dmg"
+
+          {
+            echo "version=$VERSION"
+            echo "dmg_url=$DMG_URL"
+            echo "dmg_sha256=$DMG_SHA256"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Download DMG and compute SHA256
+        id: sha
+        if: steps.inputs.outputs.dmg_sha256 == ''
+        env:
+          DMG_URL: ${{ steps.inputs.outputs.dmg_url }}
+        run: |
+          for i in 1 2 3 4 5; do
+            if curl -fsSL --retry 3 -o wiktionary-to-kindle.dmg "$DMG_URL"; then
+              break
+            fi
+            echo "Attempt $i failed, retrying in 15s..."
+            sleep 15
+          done
+
+          if [ ! -f wiktionary-to-kindle.dmg ]; then
+            echo "::error::Failed to download DMG from $DMG_URL"
+            exit 1
+          fi
+
+          SHA256=$(sha256sum wiktionary-to-kindle.dmg | awk '{print $1}')
+          echo "sha256=$SHA256" >> "$GITHUB_OUTPUT"
+          rm wiktionary-to-kindle.dmg
+
+      - name: Resolve SHA256
+        id: resolved
+        run: |
+          SHA256="${{ steps.inputs.outputs.dmg_sha256 }}"
+          if [ -z "$SHA256" ]; then
+            SHA256="${{ steps.sha.outputs.sha256 }}"
+          fi
+          echo "sha256=$SHA256" >> "$GITHUB_OUTPUT"
+
+      - name: Update cask
+        env:
+          VERSION: ${{ steps.inputs.outputs.version }}
+          SHA256: ${{ steps.resolved.outputs.sha256 }}
+        run: |
+          CASK="Casks/wiktionary-to-kindle.rb"
+
+          sed -i "s|version \"[^\"]*\"|version \"${VERSION}\"|" "$CASK"
+          sed -i "s|sha256 \"[a-f0-9]\{64\}\"|sha256 \"${SHA256}\"|" "$CASK"
+
+          grep -q "version \"${VERSION}\"" "$CASK" || { echo "::error::Version replacement failed"; exit 1; }
+          grep -q "sha256 \"${SHA256}\"" "$CASK" || { echo "::error::SHA256 replacement failed"; exit 1; }
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          commit-message: "wiktionary-to-kindle ${{ steps.inputs.outputs.version }}"
+          title: "wiktionary-to-kindle ${{ steps.inputs.outputs.version }}"
+          body: |
+            Automated cask update for wiktionary-to-kindle ${{ steps.inputs.outputs.version }}.
+
+            - **DMG:** `${{ steps.inputs.outputs.dmg_url }}`
+            - **SHA256:** `${{ steps.resolved.outputs.sha256 }}`
+          branch: "update-wiktionary-to-kindle-${{ steps.inputs.outputs.version }}"
+          delete-branch: true
