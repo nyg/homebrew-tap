@@ -12,7 +12,11 @@ cask "wiktionary-to-kindle" do
     strategy :github_latest
   end
 
-  depends_on macos: ">= :big_sur"
+  # The DMG is built on an Apple Silicon runner, so its bundled runtime is arm64-only. Rosetta
+  # cannot help here — it translates x86_64 to arm64, not the reverse — so an Intel Mac genuinely
+  # cannot run this build.
+  depends_on arch: :arm64
+  depends_on macos: :big_sur
 
   app "Wiktionary to Kindle.app"
 
@@ -25,8 +29,8 @@ cask "wiktionary-to-kindle" do
   end
 
   zap trash: [
-    "~/.config/wiktionary-to-kindle",
     "~/.cache/wiktionary-to-kindle",
+    "~/.config/wiktionary-to-kindle",
   ]
 
   caveats <<~EOS
