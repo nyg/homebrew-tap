@@ -34,7 +34,7 @@ jobs:
           fi
 
           VERSION="${VERSION#v}"
-          DMG_URL="https://github.com/nyg/crypto-tools/releases/download/v${VERSION}/CryptoTools.dmg"
+          DMG_URL="https://github.com/nyg/crypto-tools/releases/download/v${VERSION}/crypto-tools-${VERSION}-macos-arm64.dmg"
 
           {
             echo "version=$VERSION"
