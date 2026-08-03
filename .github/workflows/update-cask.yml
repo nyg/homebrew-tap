@@ -39,7 +39,7 @@ jobs:
           fi
 
           VERSION="${VERSION#v}"
-          DMG_URL="https://github.com/nyg/qoqa-compta/releases/download/v${VERSION}/QoQa.Compta.dmg"
+          DMG_URL="https://github.com/nyg/qoqa-compta/releases/download/v${VERSION}/qoqa-compta-${VERSION}-macos-arm64.dmg"
 
           {
             echo "version=$VERSION"
