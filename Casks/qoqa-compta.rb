@@ -1,6 +1,6 @@
 cask "qoqa-compta" do
-  version "0.1.0"
-  sha256 "576ed17752d94b092ec6c843624f8190b21b6ec3db7319410437a046f1f948d2"
+  version "0.1.1"
+  sha256 "3c58217fd2c46e6aed03f444444b351fdad89b6ae34b77e3829a1501a46c84e2"
 
   url "https://github.com/nyg/qoqa-compta/releases/download/v#{version}/qoqa-compta-#{version}-macos-arm64.dmg"
   name "QoQa Compta"
