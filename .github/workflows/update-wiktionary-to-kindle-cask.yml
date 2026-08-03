@@ -34,7 +34,9 @@ jobs:
           fi
 
           VERSION="${VERSION#v}"
-          DMG_URL="https://github.com/nyg/wiktionary-to-kindle/releases/download/v${VERSION}/WiktionaryToKindle.dmg"
+          # Release assets are named for the OS and CPU as of nyg/wiktionary-to-kindle#76; the DMG is
+          # built on an Apple Silicon runner. Versions up to 2.0.1 shipped as WiktionaryToKindle.dmg.
+          DMG_URL="https://github.com/nyg/wiktionary-to-kindle/releases/download/v${VERSION}/wiktionary-to-kindle-${VERSION}-macos-arm64.dmg"
 
           {
             echo "version=$VERSION"

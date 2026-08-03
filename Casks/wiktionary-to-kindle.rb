@@ -28,9 +28,12 @@ cask "wiktionary-to-kindle" do
                    args: ["-dr", "com.apple.quarantine", "#{appdir}/Wiktionary to Kindle.app"]
   end
 
+  # Dumps and generated dictionaries are deliberately left alone: they live under ~/Documents,
+  # they are multi-gigabyte, and a .mobi already copied to a Kindle is the point of the app.
   zap trash: [
     "~/.cache/wiktionary-to-kindle",
     "~/.config/wiktionary-to-kindle",
+    "~/.local/state/wiktionary-to-kindle",
   ]
 
   caveats <<~EOS
