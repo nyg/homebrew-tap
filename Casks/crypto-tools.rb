@@ -1,6 +1,6 @@
 cask "crypto-tools" do
-  version "0.1.3"
-  sha256 "7bc37dcc5dbfe11392401c81eadf9d48444c37d88d3c15a337869be91ca9e91e"
+  version "0.1.4"
+  sha256 "09eeaa881471129653425ce536898b3feacab9015d6df8ee041bb74f762ca023"
 
   url "https://github.com/nyg/crypto-tools/releases/download/v#{version}/crypto-tools-#{version}-macos-arm64.dmg"
   name "Crypto Tools"
