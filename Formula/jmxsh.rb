@@ -11,9 +11,9 @@ class Jmxsh < Formula
   end
 
   bottle do
-    root_url "https://github.com/nyg/homebrew-tap/releases/download/jmxsh-1.5.1"
-    sha256 cellar: :any_skip_relocation, arm64_tahoe:  "6016f58d87c3faeacbbf192b6eca94297ae22adba272dd611a78cb50643438d0"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "6bba380aa0da0746c9900b6e081349d0170de9fe7d5ee30d62ee0b6f06f5b70b"
+    root_url "https://github.com/nyg/homebrew-tap/releases/download/jmxsh-1.5.2"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:  "9633ebc8c689956065cf811e99da8e6e0030119ad641fd383fe8549bdb35c1fd"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "91920e1bf7d9f29dafb5e7762cfac872d1fcc4060a118fe2275ca014b2d0a1e2"
   end
 
   depends_on "openjdk@25"
