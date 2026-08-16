@@ -1,6 +1,6 @@
 cask "wiktionary-to-kindle" do
-  version "2.1.0"
-  sha256 "2279c3b717faa4581922ed62bafb23691a473ea18f49bfd8dfaeb69df3980096"
+  version "2.2.0"
+  sha256 "412e4e15577f6145c49b175b8219b3f2816c5db97939cc57b2d9a71d65e3dea3"
 
   url "https://github.com/nyg/wiktionary-to-kindle/releases/download/v#{version}/wiktionary-to-kindle-#{version}-macos-arm64.dmg"
   name "Wiktionary to Kindle"
