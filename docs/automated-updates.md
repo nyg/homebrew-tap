@@ -16,7 +16,7 @@ Both pipelines share the same test and routing stage; they differ only in what h
 
 ### Test
 
-[`tests.yml`](../.github/workflows/tests.yml), workflow name "brew test-bot". Runs on every pull request across `macos-15-intel`, `macos-26`, and a Linux container. Always runs `brew test-bot --only-tap-syntax`; on pull requests it also runs `--only-formulae`, which builds bottles and uploads them as workflow artifacts. Casks produce no bottles, so for a cask PR this stage is effectively a syntax check.
+[`tests.yml`](../.github/workflows/tests.yml), workflow name "brew test-bot". Runs on every pull request across `macos-26` and a Linux container. The casks are all `arm64`-only and the `jmxsh` bottle block has no `x86_64` macOS slot, so an Intel macOS runner produced nothing and only slowed every PR down. Always runs `brew test-bot --only-tap-syntax`; on pull requests it also runs `--only-formulae`, which builds bottles and uploads them as workflow artifacts. Casks produce no bottles, so for a cask PR this stage is effectively a syntax check.
 
 ### Route
 

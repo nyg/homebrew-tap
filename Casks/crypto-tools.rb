@@ -19,12 +19,12 @@ cask "crypto-tools" do
 
   app "Crypto Tools.app"
 
-  postflight do
+  postflight_steps do
     # The app is ad-hoc signed but not notarized; Homebrew quarantines it on
     # install, which makes Gatekeeper report it as "damaged". Strip the
     # quarantine attribute so it launches without a manual right-click → Open.
-    system_command "/usr/bin/xattr",
-                   args: ["-dr", "com.apple.quarantine", "#{appdir}/Crypto Tools.app"]
+    run "/usr/bin/xattr",
+        args: ["-dr", "com.apple.quarantine", "{{appdir}}/Crypto Tools.app"]
   end
 
   # The app writes to a folder named after itself, not after its bundle id.
