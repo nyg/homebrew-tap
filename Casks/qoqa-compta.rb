@@ -19,12 +19,12 @@ cask "qoqa-compta" do
 
   app "QoQa Compta.app"
 
-  postflight do
+  postflight_steps do
     # The app is ad-hoc signed but not notarized; Homebrew quarantines it on
     # install, which makes Gatekeeper report it as "damaged". Strip the
     # quarantine attribute so it launches without a manual right-click → Open.
-    system_command "/usr/bin/xattr",
-                   args: ["-dr", "com.apple.quarantine", "#{appdir}/QoQa Compta.app"]
+    run "/usr/bin/xattr",
+        args: ["-dr", "com.apple.quarantine", "{{appdir}}/QoQa Compta.app"]
   end
 
   # The app writes its settings and database to a folder named after itself;
