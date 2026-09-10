@@ -14,8 +14,8 @@ cask "qoqa-compta" do
 
   # Only an arm64 DMG is published, so refuse on Intel rather than installing an
   # app that cannot launch.
-  depends_on :macos
   depends_on arch: :arm64
+  depends_on :macos
 
   app "QoQa Compta.app"
 
