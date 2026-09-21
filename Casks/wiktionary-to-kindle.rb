@@ -16,7 +16,7 @@ cask "wiktionary-to-kindle" do
   # cannot help here — it translates x86_64 to arm64, not the reverse — so an Intel Mac genuinely
   # cannot run this build.
   depends_on arch: :arm64
-  depends_on macos: :big_sur
+  depends_on :macos
 
   app "Wiktionary to Kindle.app"
 
