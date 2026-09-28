@@ -35,6 +35,6 @@ cask "crypto-tools" do
   ]
 
   caveats <<~EOS
-    Crypto Tools is not notarized. On first launch, right-click the app and select Open.
+    Crypto Tools is not notarized. If blocked, click Open Anyway in System Settings → Privacy & Security.
   EOS
 end

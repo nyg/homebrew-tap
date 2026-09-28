@@ -37,7 +37,7 @@ cask "wiktionary-to-kindle" do
   ]
 
   caveats <<~EOS
-    Wiktionary to Kindle is not notarized. On first launch, right-click the app and select Open.
+    Wiktionary to Kindle is not notarized. If blocked, click Open Anyway in System Settings → Privacy & Security.
 
     Dumps and generated dictionaries default to ~/Documents/wiktionary-to-kindle.
     Downloaded dumps are 100 MB to several GB per language edition.

@@ -41,6 +41,6 @@ cask "qoqa-compta" do
   ]
 
   caveats <<~EOS
-    QoQa Compta is not notarized. On first launch, right-click the app and select Open.
+    QoQa Compta is not notarized. If blocked, click Open Anyway in System Settings → Privacy & Security.
   EOS
 end
