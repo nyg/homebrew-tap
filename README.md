@@ -33,10 +33,7 @@ on the upstream repository's GitHub release. Those DMGs are built on Apple
 Silicon runners, so they are **arm64-only**: the casks refuse to install on
 Intel Macs rather than leaving behind an app that cannot launch.
 
-The apps are ad-hoc signed but not notarized. Homebrew quarantines them on
-install, which makes Gatekeeper report them as "damaged", so each cask strips
-the quarantine attribute in a `postflight` step. If macOS still blocks the first
-launch, right-click the app and select Open.
+The apps are ad-hoc signed but not notarized. Homebrew quarantines them on install, which makes Gatekeeper report them as "damaged", so each cask strips the quarantine attribute in a `postflight` step. If macOS still blocks the first launch, open **System Settings → Privacy & Security** and click **Open Anyway**.
 
 Windows builds of the same apps are packaged in
 [nyg/scoop-bucket](https://github.com/nyg/scoop-bucket).
